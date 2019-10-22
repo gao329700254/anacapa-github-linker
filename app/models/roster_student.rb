@@ -10,4 +10,10 @@ class RosterStudent < ApplicationRecord
     user.username
   end
 
+  def status
+    # returns "Enrolled", "-" or "TA"
+    return "TA" if user && user.has_role?(:ta, course)
+    enrolled ? "Enrolled" : "Not Enrolled"
+  end
+
 end

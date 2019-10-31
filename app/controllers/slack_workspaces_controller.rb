@@ -25,19 +25,12 @@ class SlackWorkspacesController < ApplicationController
         client_id: ENV['SLACK_CLIENT_ID'],
         client_secret: ENV['SLACK_CLIENT_SECRET'],
         code: params[:code])
-    flash[:notice] = rc
     redirect_to root_path
   end
 
   # GET /slack_workspaces/1/edit
   def edit
-    client = Slack::Web::Client.new
-    rc = client.oauth_access(
-        client_id: ENV['SLACK_CLIENT_ID'],
-        client_secret: ENV['SLACK_CLIENT_SECRET'],
-        code: params[:code])
-    puts rc
-    redirect_to root_path
+
   end
 
   # POST /slack_workspaces

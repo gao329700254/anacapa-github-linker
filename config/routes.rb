@@ -16,6 +16,7 @@ Rails.application.routes.draw do
     post :join
     get :view_ta
     post :update_ta
+    post :remove_slack_workspace
     get :slack_auth_callback, on: :collection
     scope module: :courses do
       resources :roster_students do

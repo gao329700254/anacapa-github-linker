@@ -106,13 +106,53 @@ class CoursesController < ApplicationController
   helper_method :is_org_member
 
   def slack_auth_callback
-    client = Slack::Web::Client.new
-    rc = client.oauth_access(
-        client_id: ENV['SLACK_CLIENT_ID'],
-        client_secret: ENV['SLACK_CLIENT_SECRET'],
-        code: params[:code])
-    flash[:notice] = rc
-    redirect_to root_path
+    begin
+      client = Slack::Web::Client.new
+      rc = client.oauth_access(
+          client_id: ENV['SLACK_CLIENT_ID'],
+          client_secret: ENV['SLACK_CLIENT_SECRET'],
+          code: params[:code])
+
+      new_workspace = construct_slack_workspace_object_from_oauth_request(rc, client)
+
+      @course = Course.find(params[:state])
+      @course.slack_workspace_id = new_workspace.id
+      @course.slack = new_workspace.name
+      @course.save
+      redirect_to edit_course_path(id: params[:state]), notice: "Slack workspace successfully added."
+    rescue Exception => e
+      redirect_to edit_course_path(id: params[:state]), alert: "Adding or modifying the course's Slack workspace
+        encountered an error. Please try again."
+    end
+
+  end
+
+  # fs - This is a stupid place to define what is essentially a constructor for a SlackWorkspace
+  # object based on the results of a Slack web call. I have no idea how to deal with
+  # initializers/constructors for models in Rails yet and I don't want to get sidetracked into that right now.
+  # TODO: Put this method's code into an initializer method for SlackWorkspace
+  def construct_slack_workspace_object_from_oauth_request(rc, client)
+    access_token = rc['access_token']
+    bot_access_token = rc['bot']['bot_access_token']
+    team_name = rc['team_name']
+
+    client.token = bot_access_token
+    team_info = client.team_info()
+    team_domain = team_info['team']['domain']
+    SlackWorkspace.create(access_token: access_token, bot_access_token: bot_access_token, name:
+        team_name, slack_url: team_domain)
+  end
+
+ # helper_method construct_slack_workspace_object_from_oauth_request
+
+  def remove_slack_workspace
+    @course = Course.find(params[:course_id])
+    # slack_workspace = SlackWorkspace.find(@course.slack_workspace_id)
+    @course.slack_workspace_id
+    @course.slack = nil
+    # slack_workspace.destroy
+    @course.save
+    redirect_to edit_course_path(id: params[:course_id])
   end
 
   private

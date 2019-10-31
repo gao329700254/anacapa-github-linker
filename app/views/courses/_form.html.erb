@@ -21,32 +21,30 @@
   <%= form.label :course_organization %>
   <%= form.text_field :course_organization %>
   </div>
+  </p>
 
+  <p>
   <div class="field">
-    <%= form.label :slack %>
-    <%= form.text_field :slack, readonly: true %>
+    <%= form.label "Slack workspace" %>
+    <%= form.text_field :slack, :value => (SlackWorkspace.exists?(@course.slack_workspace_id) ?
+             SlackWorkspace.find(@course.slack_workspace_id).name : "No workspace connected"),
+            :maxlength => "25", :readonly => true %>
   </div>
   </p>
 
   <% if @course.persisted? %>
-  <p>
-  <div class="field">
-    <%= form.label :slack %>
-    <%= form.text_field :slack, :value => @course.slack || "No workspace connected", :maxlength => "25", :readonly =>
-        true%>
-  </div>
-  </p>
-    <% if !@course.slack? %>
+
+    <% if !@course.slack? || !@course.slack_workspace_id? %>
       <p>
-    <a href=<%= "https://slack.com/oauth/authorize?scope=commands,bot&client_id=795375685718.781696135747&state=" +
-        String(@course.id) %>> Connect Slack workspace</a>
-    </p>
+      <a href=<%= "https://slack.com/oauth/authorize?scope=commands,bot&client_id=" + ENV['SLACK_CLIENT_ID'] +
+                    "&state=" + String(@course.id) %>> Connect Slack workspace</a>
+      </p>
     <% else %>
-      <a href=<%= "https://slack.com/oauth/authorize?scope=commands,bot&client_id=795375685718.781696135747&state=" +
-        String(@course.id) %>> Update Slack workspace authentication</a>
+      <a href=<%= "https://slack.com/oauth/authorize?scope=commands,bot&client_id=" + ENV['SLACK_CLIENT_ID'] +
+                     "&state=" + String(@course.id) %>> Change Slack workspace/modify authorization</a>
       <p>
-      <a href=<%= "https://slack.com/oauth/authorize?scope=commands,bot&client_id=795375685718.781696135747&state=" +
-        String(@course.id) %>> Remove Slack workspace from course</a>
+      <%= link_to "Remove Slack workspace from course", course_remove_slack_workspace_path(course_id: @course.id),
+                  method: :post %>
       </p>
     <% end %>
   <% end %>

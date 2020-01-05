@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20191217022023) do
+ActiveRecord::Schema.define(version: 20200105051606) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,6 +23,13 @@ ActiveRecord::Schema.define(version: 20191217022023) do
     t.string "summary"
     t.string "job_short_name"
     t.index ["course_id"], name: "index_completed_jobs_on_course_id"
+  end
+
+  create_table "course_sections", force: :cascade do |t|
+    t.string "name"
+    t.integer "enroll_code"
+    t.bigint "course_id"
+    t.index ["course_id"], name: "index_course_sections_on_course_id"
   end
 
   create_table "courses", force: :cascade do |t|

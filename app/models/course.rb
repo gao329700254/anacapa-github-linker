@@ -7,6 +7,7 @@ class Course < ApplicationRecord
   validate :check_course_org_exists
   has_many :roster_students, dependent: :destroy
 
+  has_many :course_sections
   resourcify
 
   def org
